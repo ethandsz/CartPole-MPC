@@ -1,6 +1,7 @@
 import gymnasium as gym
 import numpy as np
 from scipy.optimize import minimize
+from gymnasium.wrappers import RecordVideo
 
 def initStateAndControlMatrices():
     A = np.eye(4)  # State transformational matrix
@@ -34,7 +35,13 @@ def initCostMatrices():
     R = np.array([[0.1]])  # Penalize large control inputs
     return Q,R
 
+# Uncomment if you want to save the video
+# env = gym.make("CartPole-v1", render_mode="rgb_array")
+# env = RecordVideo(env, video_folder="videos", episode_trigger=lambda e: e == 0)
+
 env = gym.make("CartPole-v1", render_mode="human")
+
+
 observation, info = env.reset()
 
 A, B = initStateAndControlMatrices()  # Init State and control matrices
