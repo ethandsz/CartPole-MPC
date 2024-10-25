@@ -12,7 +12,13 @@ The CartPole environment consists of a cart that can move along a track with a p
 
 ![MPC CartPole Simulation](videos/video-episode-0.gif)
 
-
 ### Performance Plot
 
 ![Performance Plot](figs/pole_angle.png)
+
+### Simulation GIF With Control Input Weights Set To 0
+![MPC CartPole Simulation](videos/video-episode-0-no-control-weights.gif)
+
+### Performance Plot With Control Input Weights Set To 0
+![MPC CartPole Simulation](figs/pole_angle_no_control_weights.png)
+
