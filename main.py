@@ -17,10 +17,12 @@ def initStateAndControlMatrices():
 
 def computeCost(U, A, B, observation, target_state):
     cost = 0  # Init cost to 0
-    for i in range(N):
+    C = np.zeros((10,4))
+    C[0] = observation
+    for i in range(N-1):
         action = U[i].reshape(1,-1)
-        C = (A @ observation) + np.hstack(B @ action)  # Output matrix C
-        state_error = C - target_state  # Difference in state error
+        C[i+1] = (A @ C[i]) + np.hstack(B @ action)  # Output matrix C
+        state_error = C[i+1] - target_state  # Difference in state error
         Jz = state_error.T @ Q @ state_error  # State error weighting
         Ju = action.T @ R @ action  # Control error weighting
         cost += Jz + Ju  # Total cost to minimize
@@ -29,11 +31,11 @@ def computeCost(U, A, B, observation, target_state):
 
 def initCostMatrices():
     Q = np.eye(4)  # Penalize state deviation
-    Q[0,0] = 1500 # Cart position
-    Q[1,1] = 0 # Cart velocity
+    Q[0,0] = 1000 # Cart position
+    Q[1,1] = 10 # Cart velocity
     Q[2,2] = 1000 # Pole Angle
-    Q[3,3] = 1000 # Pole Angular Velocity
-    R = np.array([[0.1]])  # Penalize large control inputs
+    Q[3,3] = 12 # Pole Angular Velocity
+    R = np.array([[0]])  # Penalize large control inputs
     return Q,R
 
 # Uncomment if you want to save the video
@@ -79,7 +81,7 @@ plt.ylabel("Pole angle (rad)")
 plt.xlabel("Timesteps")
 plt.legend()
 plt.title("CartPole - angle of pole using an MPC controller")
-plt.savefig("figs/pole_angle")
+plt.savefig("figs/pole_angle_no_control_weights")
 plt.show()
 
 
