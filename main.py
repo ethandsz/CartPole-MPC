@@ -1,4 +1,5 @@
 import gymnasium as gym
+import matplotlib.pyplot as plt
 import numpy as np
 from scipy.optimize import minimize
 from gymnasium.wrappers import RecordVideo
@@ -9,7 +10,7 @@ def initStateAndControlMatrices():
         [[0],
          [1],
          [-1],
-         [-0.5]]
+         [-1]]
     )
     return A, B
 
@@ -54,12 +55,13 @@ N = 10  # Prediction Horizon
 # Target state, Cart position, Cart velocity, Pole Angle, and Pole Angular Velocity
 target_state = np.array([0, 0, 0, 0])
 
-
+observed_all = []
 iteration_count = 0
 while not episode_over:
     action = env.action_space.sample()
     U0 = np.zeros(N)
     U0[0] = action
+    observed_all.append(observation)
     result = minimize(computeCost, U0, args=(A, B, observation, target_state), bounds=[(-1, 1)] * N)
     optimal_action = 1 if result.x[0] > 0 else 0  # Convert to a discrete value
     print("Action: ", optimal_action)
@@ -69,3 +71,16 @@ while not episode_over:
     iteration_count += 1
 
 env.close()
+pole_angles = [obs[2] for obs in observed_all]
+    
+plt.plot(np.linspace(0,iteration_count, iteration_count), pole_angles, label="Measured pole angle")
+plt.plot(np.linspace(0,iteration_count, iteration_count), np.zeros(iteration_count), label="Desired pole angle")
+plt.ylabel("Pole angle (rad)")
+plt.xlabel("Timesteps")
+plt.legend()
+plt.title("CartPole - angle of pole using an MPC controller")
+plt.savefig("figs/pole_angle")
+plt.show()
+
+
+
