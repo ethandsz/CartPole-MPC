@@ -7,9 +7,9 @@ def initStateAndControlMatrices():
     A = np.eye(4)  # State transformational matrix
     B = np.array(
         [[0],
-        [1.0 / (1 + 0.1)],
-        [-1],
-        [-0.5 / (1 + 0.1)]]
+         [1],
+         [-1],
+         [-0.5]]
     )
     return A, B
 
