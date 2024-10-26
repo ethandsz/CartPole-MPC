@@ -3,6 +3,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.optimize import minimize
 from gymnasium.wrappers import RecordVideo
+import random
+import decimal
+
+
 
 def initStateAndControlMatrices():
     A = np.eye(4)  # State transformational matrix
@@ -17,7 +21,7 @@ def initStateAndControlMatrices():
 
 def computeCost(U, A, B, observation, target_state):
     cost = 0  # Init cost to 0
-    C = np.zeros((10,4))
+    C = np.zeros((N,4))
     C[0] = observation
     for i in range(N-1):
         action = U[i].reshape(1,-1)
@@ -26,7 +30,7 @@ def computeCost(U, A, B, observation, target_state):
         Jz = state_error.T @ Q @ state_error  # State error weighting
         Ju = action.T @ R @ action  # Control error weighting
         cost += Jz + Ju  # Total cost to minimize
-    print("Total state error: ", cost)
+
     return cost
 
 def initCostMatrices():
@@ -34,8 +38,8 @@ def initCostMatrices():
     Q[0,0] = 1000 # Cart position
     Q[1,1] = 10 # Cart velocity
     Q[2,2] = 1000 # Pole Angle
-    Q[3,3] = 12 # Pole Angular Velocity
-    R = np.array([[0]])  # Penalize large control inputs
+    Q[3,3] = 100 # Pole Angular Velocity
+    R = np.array([[0.1]])  # Penalize large control inputs
     return Q,R
 
 # Uncomment if you want to save the video
@@ -52,18 +56,27 @@ Q, R = initCostMatrices()
 
 episode_over = False
 
-N = 10  # Prediction Horizon
+N = 8  # Prediction Horizon
 
 # Target state, Cart position, Cart velocity, Pole Angle, and Pole Angular Velocity
 target_state = np.array([0, 0, 0, 0])
 
 observed_all = []
 iteration_count = 0
+noise = False
+
+def kalmanFilter(observation):
+    pass
+
+
 while not episode_over:
     action = env.action_space.sample()
     U0 = np.zeros(N)
     U0[0] = action
     observed_all.append(observation)
+    if noise:
+        observation = observation + np.random.normal(0, 0.1)
+       # observation = kalmanFilter(observation)
     result = minimize(computeCost, U0, args=(A, B, observation, target_state), bounds=[(-1, 1)] * N)
     optimal_action = 1 if result.x[0] > 0 else 0  # Convert to a discrete value
     print("Action: ", optimal_action)
@@ -74,6 +87,7 @@ while not episode_over:
 
 env.close()
 pole_angles = [obs[2] for obs in observed_all]
+cart_pos = [obs[0] for obs in observed_all]
     
 plt.plot(np.linspace(0,iteration_count, iteration_count), pole_angles, label="Measured pole angle")
 plt.plot(np.linspace(0,iteration_count, iteration_count), np.zeros(iteration_count), label="Desired pole angle")
